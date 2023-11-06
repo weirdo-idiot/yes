@@ -1,0 +1,124 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+struct node {
+    int key;
+    struct node* left;
+    struct node* right;
+};
+
+struct node* newNode(int item) {
+    struct node* temp = (struct node*)malloc(sizeof(struct node));
+    temp->key = item;
+    temp->left = temp->right = NULL;
+    return temp;
+}
+
+struct node* insert(struct node* root, int key) {
+    if (root == NULL)
+        return newNode(key);
+
+    if (key < root->key)
+        root->left = insert(root->left, key);
+    else if (key > root->key)
+        root->right = insert(root->right, key);
+
+    return root;
+}
+
+struct node* minValueNode(struct node* root) {
+    struct node* current = root;
+    while (current && current->left != NULL)
+        current = current->left;
+    return current;
+}
+
+struct node* deleteNode(struct node* root, int key) {
+    if (root == NULL)
+        return root;
+
+    if (key < root->key)
+        root->left = deleteNode(root->left, key);
+    else if (key > root->key)
+        root->right = deleteNode(root->right, key);
+    else {
+        if (root->left == NULL) {
+            struct node* temp = root->right;
+            free(root);
+            return temp;
+        } else if (root->right == NULL) {
+            struct node* temp = root->left;
+            free(root);
+            return temp;
+        }
+        struct node* temp = minValueNode(root->right);
+        root->key = temp->key;
+        root->right = deleteNode(root->right, temp->key);
+    }
+    return root;
+}
+
+void inorder(struct node* root) {
+    if (root != NULL) {
+        inorder(root->left);
+        printf("%d ", root->key);
+        inorder(root->right);
+    }
+}
+
+int countLeafNodes(struct node* root) {
+    if (root == NULL)
+        return 0;
+    if (root->left == NULL && root->right == NULL)
+        return 1;
+    return countLeafNodes(root->left) + countLeafNodes(root->right);
+}
+
+int main() {
+    struct node* root = NULL;
+    int value, choice;
+
+    printf("Enter values for the binary search tree (enter -1 to stop):\n");
+
+    while (1) {
+        printf("Enter a value: ");
+        scanf("%d", &value);
+
+        if (value == -1)
+            break;
+
+        root = insert(root, value);
+    }
+
+    while (1) {
+        printf("\nOptions:\n");
+        printf("1. Inorder Traversal\n");
+        printf("2. Delete a Node\n");
+        printf("3. Count Leaf Nodes\n");
+        printf("4. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                printf("Inorder traversal of the BST: ");
+                inorder(root);
+                printf("\n");
+                break;
+            case 2:
+                printf("Enter the value to delete: ");
+                scanf("%d", &value);
+                root = deleteNode(root, value);
+                break;
+            case 3:
+                printf("Total leaf nodes in the BST: %d\n", countLeafNodes(root));
+                break;
+            case 4:
+                exit(0);
+            default:
+                printf("Invalid choice, please try again.\n");
+        }
+    }
+
+    return 0;
+}
